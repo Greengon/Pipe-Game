@@ -410,8 +410,10 @@ public class PipeGameBoard extends State<char[][]> {
 				return false;
 			if ((this.pressedRowCol[1] == col -1 || this.pressedRowCol[1] == col + 1) && (this.pressedRowCol[0] == row) &&(state[pressedRowCol[0]][pressedRowCol[1]] == '-' && state[row][col] == '-'))
 				return false;
-			if (this.state[row][col] == '-' && this.state[row][col+1] == '-' && this.state[row][col-1] == '-' && !(this.state[row-1][col] == '|' || this.state[row-1][col] == '|'))
-				return false;
+			if (col != 0 && col != this.numOfCols - 1 && row != 0 && row != this.numOfRows - 1) {
+				if (this.state[row][col] == '-' && this.state[row][col+1] == '-' &&(col != 0 && this.state[row][col-1] == '-') && (row != 0 && !(this.state[row-1][col] == '|' || this.state[row-1][col] == '|')))
+					return false;
+			}
 			return true;
 		}
 		
