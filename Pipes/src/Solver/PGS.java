@@ -113,7 +113,10 @@ public class PGS implements Solver<String> {
         BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
         BufferedReader inFromServer = new BufferedReader(new InputStreamReader(theServer.getInputStream()));
         PrintWriter outToServer = new PrintWriter(theServer.getOutputStream());
-
+		String problem1 = "s-7g\r\n" + 
+				"--L7\r\n" + 
+				"----";
+		PGS test1 = new PGS(problem1);
         String line;
         while (!(line = inFromUser.readLine()).equals("done")) {
             outToServer.println(line);//Don't forget to use line break.
