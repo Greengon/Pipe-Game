@@ -9,5 +9,6 @@ package Solver;
 
 public interface Solver<T> {
 	String solve(T problem); // I decided any answer should always return as a String to be saved.
+	public int SearchableSize();
 	void createProblem(); // Unknown yet
 }

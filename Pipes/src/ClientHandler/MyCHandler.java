@@ -38,7 +38,8 @@ public class MyCHandler<T> implements ClientHandler {
 	}
 	
 	
-	// Didn't find a need to Setters and Getters in this class
+	// Getters and setters
+	Solver<String> getSolver(){return this.solver;}
 	
 	// methods
 	

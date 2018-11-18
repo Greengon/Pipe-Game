@@ -5,9 +5,7 @@
 
 package Server;
 
-import ClientHandler.ClientHandler;
-
 public interface Server {
-	void start(ClientHandler ch);
+	void start();
 	void stop();
 }

@@ -15,4 +15,6 @@ public interface Searchable<T> {
 	public void setCameFrom(Searchable<T> cameFrom);
 	public Searchable<T> getCameFrom();
 	public int getLengthFromStart();
+	public int getNumOfCols();
+	public int getNumOfRows();
 }
