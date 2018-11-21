@@ -95,7 +95,7 @@ public class PGS implements Solver<String> {
 		//PGS test2 = new PGS(problem2);
 		//PGS test3 = new PGS(problem3);
 		//long end = new Date().getTime();
-		//MyServer myserver = new MyServer(10000,4);
+		MyServer myserver = new MyServer(10000,4);
 		/*if (test1.getPipeGameBoard() != null) {
 			if (test1.getPipeGameBoard().isGoal())
 				System.out.println("There is a solution!");
@@ -104,33 +104,8 @@ public class PGS implements Solver<String> {
 		}
 		else System.out.println("no solution!");
 	*/
-	//	myserver.start();
-        //Remove the exception to try/catch
-        System.out.println("**** Client Side ****");
+		myserver.start();
 
-        Socket theServer = new Socket("localhost", 10000);
-        System.out.println("Connected to server");
-        BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
-        BufferedReader inFromServer = new BufferedReader(new InputStreamReader(theServer.getInputStream()));
-        PrintWriter outToServer = new PrintWriter(theServer.getOutputStream());
-		String problem1 = "s-7g\r\n" + 
-				"--L7\r\n" + 
-				"----";
-		PGS test1 = new PGS(problem1);
-        String line;
-        while (!(line = inFromUser.readLine()).equals("done")) {
-            outToServer.println(line);//Don't forget to use line break.
-            outToServer.flush();
-            System.out.println(inFromServer.readLine());
-        }
-        outToServer.println("done");
-        outToServer.flush();
-
-        //Close everything
-        inFromServer.close();
-        outToServer.close();
-        inFromUser.close();
-        theServer.close();
 	}
 
 }

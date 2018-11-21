@@ -66,12 +66,19 @@ public class MyCHandler<T> implements ClientHandler {
 			String line;
 			String solution;
 			String problem = "";
+			System.out.println("Now starts to get user puzzle");
 			while (!(line = inFClient.readLine()).equals("done")) {
+				System.out.println("adds line" + line);
 				problem += new StringBuilder(line);
+				System.out.println("Added line");
+				System.out.println(problem);
+				System.out.println("flused");
 				outTC.flush();
 			}
 			
+			System.out.println("This is how the server got the problem: " + problem );
 			if ((solution = sendToSolver(problem)) != null){
+				System.out.println("Problem send to solver");
 				outTC.println(solution);
 		     	outTC.println("done");
 			}

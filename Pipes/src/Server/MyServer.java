@@ -15,6 +15,7 @@ package Server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.PriorityQueue;
 import java.util.concurrent.ExecutorService;
@@ -87,27 +88,14 @@ public class MyServer implements Server {
 		serverSocket = new ServerSocket(port);
 		//serverSocket.setSoTimeout(1000);
 		while(!stop) {
+			try {
 				Socket aClient = serverSocket.accept();
 				MyCHandler<String> ch = new MyCHandler<String>();
 				queue.add(ch);
-				executor.execute(			
-						new Runnable()  {
-						    public void run() {
-							try {
-							MyCHandler<String> ch = queue.poll();
-							ch.handle(aClient.getInputStream(),aClient.getOutputStream());
-							//the ch is responsible for closing the streams
-							aClient.close();
-							serverSocket.close();
-							System.out.println("Server sockect closed");
-							}catch (IOException e) {
-								e.printStackTrace();
-							}catch (Exception e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}finally {
-								System.out.println("safe exit");
-							}}});
+				executor.execute(new EchoThread(aClient));
+			}catch(SocketException se){
+				System.out.println("No one connected to the socket");
+			}
 				}
 		}
 
@@ -120,15 +108,43 @@ public class MyServer implements Server {
 			e.printStackTrace();
 		}
 	}	
+	
 	@Override
 	public void stop() {
 		try {
 			stop = true;
 			executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
 			System.out.println("done");
-		}catch (InterruptedException e){
+	     	serverSocket.close();
+		}catch (Exception e){
 			System.out.println("Problem to wait to all Threads to finish");
 		}
-	} 
+	}
 	
-}
+	
+	//class to open thread for each client
+	public class EchoThread extends Thread {
+	    protected Socket socket;
+	    
+	    public EchoThread(Socket clientSocket) {
+	        this.socket = clientSocket;
+	    }
+	
+	    public void run() {
+		try {
+		MyCHandler<String> ch = queue.poll();
+		ch.handle(socket.getInputStream(),socket.getOutputStream());
+		//the ch is responsible for closing the streams
+		socket.close();
+		System.out.println("Server sockect closed");
+		}catch (IOException e) {
+		//	e.printStackTrace();
+		}catch (Exception e) {
+			// TODO Auto-generated catch block
+		//	e.printStackTrace();
+		}finally {
+			System.out.println("safe exit");
+		}
+	    }
+	}
+	}
