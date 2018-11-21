@@ -10,8 +10,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public interface ClientHandler {
-	void handle(InputStream in, OutputStream out) throws Exception;
+	void recive(InputStream in) throws Exception;
+	void send(OutputStream out)throws Exception;
 }
-
-
-

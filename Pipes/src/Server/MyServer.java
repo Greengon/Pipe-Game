@@ -43,62 +43,23 @@ public class MyServer implements Server {
 		this.executor = Executors.newFixedThreadPool(M); 
 	}
 
-/*
- * private void startServer(ClientHandler ch) throws Exception {
-		serverSocket = new ServerSocket(port);
-		serverSocket.setSoTimeout(1000);
-		//System.out.println("Server connected - waiting");
-		
-		while(!stop) {
-			try {
-				Socket aClient = serverSocket.accept();
-				//System.out.println("client connected");
-				
-				ch.handle(aClient.getInputStream(),aClient.getOutputStream());
-				// the ch is responsible for closing the streams
-
-				aClient.close();
-			} catch(SocketTimeoutException e) {
-			//	System.out.println("Client did not connect...");
-			} finally {
-				//System.out.println("safe exit");
-			}
-		}
-		serverSocket.close();
-		//System.out.println("Server sockect closed");
-	}
-
-	@Override
-	public void start(ClientHandler ch) {
-		new Thread(() -> {
-			try {
-				startServer(ch);
-				} catch (IOException e) {
-					e.printStackTrace();
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-		}).start();
-	}
-
-*/
-
 	private void startServer() throws Exception {
 		serverSocket = new ServerSocket(port);
 		//serverSocket.setSoTimeout(1000);
 		while(!stop) {
 			try {
+				System.out.println("wait for cliant");
 				Socket aClient = serverSocket.accept();
-				MyCHandler<String> ch = new MyCHandler<String>();
+				MyCHandler<String> ch = new MyCHandler<String>(aClient);
+				ch.recive(aClient.getInputStream());
 				queue.add(ch);
-				executor.execute(new EchoThread(aClient));
+				executor.execute(new EchoThread(queue.poll()));
 			}catch(SocketException se){
 				System.out.println("No one connected to the socket");
 			}
 				}
 		}
-
+	
 	@Override
 	public void start() {
 		try {
@@ -125,26 +86,27 @@ public class MyServer implements Server {
 	//class to open thread for each client
 	public class EchoThread extends Thread {
 	    protected Socket socket;
-	    
-	    public EchoThread(Socket clientSocket) {
-	        this.socket = clientSocket;
+	    MyCHandler<String> ch;
+	    public EchoThread(MyCHandler<String> ch ) {
+	        this.socket = ch.getClient();
+	        this.ch=ch;
+	        
 	    }
-	
 	    public void run() {
 		try {
-		MyCHandler<String> ch = queue.poll();
-		ch.handle(socket.getInputStream(),socket.getOutputStream());
-		//the ch is responsible for closing the streams
-		socket.close();
-		System.out.println("Server sockect closed");
-		}catch (IOException e) {
-		//	e.printStackTrace();
-		}catch (Exception e) {
-			// TODO Auto-generated catch block
-		//	e.printStackTrace();
-		}finally {
-			System.out.println("safe exit");
-		}
+			System.out.println("He arrived to run");
+			ch.send(socket.getOutputStream());
+			//the ch is responsible for closing the streams
+			socket.close();
+			System.out.println("Server sockect closed");
+			}catch (IOException e) {
+				e.printStackTrace();
+			}catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}finally {
+				System.out.println("safe exit");
+			}
 	    }
 	}
 	}

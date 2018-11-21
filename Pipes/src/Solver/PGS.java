@@ -1,10 +1,6 @@
 package Solver;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Date;
 
@@ -32,7 +28,6 @@ public class PGS implements Solver<String> {
 	public Searcher<char[][]> getSearcher(){return searcher;}
 	public Searchable<char[][]> getPipeGameBoard(){return pipeGameBoard;}
 	public String getSolution() {return this.solution;} 
-	public int SearchableSize() {return this.pipeGameBoard.getNumOfCols()*this.pipeGameBoard.getNumOfRows();};
 	
 	// methods
 	
@@ -79,11 +74,11 @@ public class PGS implements Solver<String> {
 	
 	// Main for test
 	public static void main(String[] args) throws UnknownHostException, IOException {
-		/*
-		String problem1 = "s-7g\r\n" + 
-				"--L7\r\n" + 
-				"----";
-		String problem2 = "s-7g\r\n" + 
+		
+		/*String problem1 = "----\r\n" + 
+				"---g\r\n" + 
+				"s-|FJ";
+			String problem2 = "s-7g\r\n" + 
 				"--L7\r\n" + 
 				"----";
 		String problem3= "s-7g\r\n" + 
@@ -96,7 +91,7 @@ public class PGS implements Solver<String> {
 		//PGS test3 = new PGS(problem3);
 		//long end = new Date().getTime();
 		MyServer myserver = new MyServer(10000,4);
-		/*if (test1.getPipeGameBoard() != null) {
+	/*	if (test1.getPipeGameBoard() != null) {
 			if (test1.getPipeGameBoard().isGoal())
 				System.out.println("There is a solution!");
 			System.out.println("total: " + (end - start) + " mili seconds");
@@ -104,7 +99,7 @@ public class PGS implements Solver<String> {
 		}
 		else System.out.println("no solution!");
 	*/
-		myserver.start();
+	myserver.start();
 
 	}
 
