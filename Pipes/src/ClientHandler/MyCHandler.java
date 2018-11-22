@@ -77,14 +77,14 @@ public class MyCHandler<T> implements ClientHandler {
 			// write to the server the problem 
 			// this need to be more generic
 			String line = "";
-			System.out.println("Now starts to get user puzzle");
+			//System.out.println("Now starts to get user puzzle");
 			while (!(line = inFClient.readLine()).equals("done")) {
-				System.out.println("adds line" + line);
+				//System.out.println("adds line" + line);
 				this.problem += new StringBuilder(line);
-				System.out.println("Added line");
+				//System.out.println("Added line");
 				this.problem += "\n";
-				System.out.println(this.problem);
-				System.out.println("flused");
+				//System.out.println(this.problem);
+				//System.out.println("flused");
 			}}catch(IOException E) {
 				E.printStackTrace();
 			}
@@ -99,11 +99,11 @@ public class MyCHandler<T> implements ClientHandler {
 		try {
 			String solution;
 			PrintWriter outTC = new PrintWriter(out);
-			System.out.println("This is how the server got the problem: " + problem );
+			//System.out.println("This is how the server got the problem: " + problem );
 			if ((solution = sendToSolver(problem)) != null){
-				System.out.println("Problem send to solver");
+				//System.out.println("Problem send to solver");
 				Thread.sleep(1000);
-				System.out.println("solution: " + solution);
+				//System.out.println("solution: " + solution);
 				outTC.println(solution.replaceAll("\n",","));
 		     	long end = new Date().getTime();
 		     	outTC.println("Started: " + start + " Ended: " + end );

@@ -20,6 +20,7 @@ import java.net.SocketTimeoutException;
 import java.util.PriorityQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import ClientHandler.BoardComparator;
@@ -33,31 +34,33 @@ public class MyServer implements Server {
 	private int port;
 	private boolean stop = false;
 	private int M;
-	private PriorityQueue<MyCHandler<String>> queue;
-	private ExecutorService executor;
+	private priorityJobScheduler scheduler;
+
 	
 	// CTOR
 	public MyServer(int port,int M){
 		this.port =port;
-		this.queue = new PriorityQueue<MyCHandler<String>>(new BoardComparator<String>());
-		this.executor = Executors.newFixedThreadPool(M); 
+		this.M = M;
 	}
 
 	private void startServer() throws Exception {
-		serverSocket = new ServerSocket(port);
-		//serverSocket.setSoTimeout(1000);
+		Socket socket = null;
+		ServerSocket serverSocket = null;
+		this.scheduler = new priorityJobScheduler();
+		try {
+			serverSocket = new ServerSocket(port);
+			} catch (IOException e) {
+				e.printStackTrace();
+				}
 		while(!stop) {
 			try {
-				System.out.println("wait for cliant");
-				Socket aClient = serverSocket.accept();
-				MyCHandler<String> ch = new MyCHandler<String>(aClient);
-				ch.recive(aClient.getInputStream());
-				queue.add(ch);
-				executor.execute(new EchoThread(queue.poll()));
-			}catch(SocketException se){
-				System.out.println("No one connected to the socket");
+				 socket = serverSocket.accept();
+				} catch (IOException e) {
+					System.out.println("I/O error: " + e);
+					}
+			// new thread for a client
+			new reciveThread(socket).start();
 			}
-				}
 		}
 	
 	@Override
@@ -74,39 +77,90 @@ public class MyServer implements Server {
 	public void stop() {
 		try {
 			stop = true;
-			executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-			System.out.println("done");
+			scheduler.executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+			//System.out.println("done");
 	     	serverSocket.close();
 		}catch (Exception e){
-			System.out.println("Problem to wait to all Threads to finish");
+			//System.out.println("Problem to wait to all Threads to finish");
 		}
 	}
 	
 	
 	//class to open thread for each client
-	public class EchoThread extends Thread {
+	public class solveThread extends Thread {
 	    protected Socket socket;
-	    MyCHandler<String> ch;
-	    public EchoThread(MyCHandler<String> ch ) {
+	    public MyCHandler<String> ch;
+	    public solveThread(MyCHandler<String> ch ) {
 	        this.socket = ch.getClient();
 	        this.ch=ch;
 	        
 	    }
 	    public void run() {
 		try {
-			System.out.println("He arrived to run");
+			//System.out.println("He arrived to run");
 			ch.send(socket.getOutputStream());
 			//the ch is responsible for closing the streams
 			socket.close();
-			System.out.println("Server sockect closed");
+			//System.out.println("Server sockect closed");
 			}catch (IOException e) {
 				e.printStackTrace();
 			}catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}finally {
-				System.out.println("safe exit");
+				//System.out.println("safe exit");
 			}
 	    }
+	}
+	
+	public class reciveThread extends Thread {
+	    protected Socket socket;
+
+	    public reciveThread(Socket clientSocket) {
+	        this.socket = clientSocket;
+	    }
+
+	    public void run() {
+	    	try {
+				//System.out.println("wait for cliant");
+				MyCHandler<String> ch = new MyCHandler<String>(this.socket);
+				ch.recive(this.socket.getInputStream());
+				scheduler.scheduleSolve(new solveThread(ch));
+			}catch(SocketException se){
+				//System.out.println("No one connected to the socket");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    }
+	}
+	
+	public class priorityJobScheduler{
+		private ExecutorService priorityJobScheduler;
+		private PriorityBlockingQueue<solveThread> queue;
+		private ExecutorService executor;
+		
+		public priorityJobScheduler() {
+		//this.queue = new PriorityBlockingQueue<MyCHandler<String>>(10,new BoardComparator<String>());
+		this.queue = new PriorityBlockingQueue<solveThread>(10,new BoardComparator<String>());
+		this.executor = Executors.newFixedThreadPool(M); 
+		this.priorityJobScheduler = Executors.newSingleThreadExecutor();
+		this.priorityJobScheduler.execute(()->{
+					while(true)
+						try {
+							executor.execute(queue.take());
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					});
+		}
+		
+		public void scheduleSolve(solveThread st) {
+			this.queue.add(st);
+		}
 	}
 	}
